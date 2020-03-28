@@ -32,18 +32,18 @@ abstract: "Этот отчет использует общедоступные �
 
 
 <!-- This is left-side text 1-->
-# [Table of Contents](https://nextstrain.org/ncov/2020-03-27?d=tree,map&p=grid)
+# [Содержание](https://nextstrain.org/ncov/2020-03-27?d=tree,map&p=grid)
 
-* [Background resources](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-26?n=2).     
-* [About this data](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=3).  
-* [Updates for Europe](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=4).  
-* [Updates for North America](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=6).  
-* [Updates for Central & South America](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=10).  
-* [Updates for Asia](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=12).  
-* [Updates for Africa](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=14).  
-* [Updates for Oceania](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=16).  
-* [What you can do](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=18).  
-* [Scientific credit](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=19).  
+* [Справочные ресурсы](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-26?n=2).
+* [Об этих данных](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=3).  
+* [Последние данные по Европе](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=4).  
+* [Последние данные по Северной Америке](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=6).  
+* [Последние данные по Центральной и Южной Америке](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=10).  
+* [Последние данные по Азии](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=12).  
+* [Последние данные по Африке](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=14).  
+* [Последние данные по Океании](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=16).  
+* [Что вы можете предпринять](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=18).  
+* [Благодарности](https://nextstrain.org/narratives/ncov/sit-rep/2020-03-27?n=19).  
 <!-- This is right-side text -->
 ```auspiceMainDisplayMarkdown
 # Executive summary
