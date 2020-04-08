@@ -1,4 +1,18 @@
 #!/usr/bin/env python
+"""
+Parse excel to tsv 
+
+"""
+
+## Updates:
+# Currently only works with acknowlegement table and normalized fasta from GISAID.
+# Acknowledgement table has missing columns age, sex, region_exposure, country_exposure , submission_data
+# Currently imputes submission date to be 2 weeks from sample collection data
+# Region exposure and country exposure to region and country values  ( only very few samples have updated values )
+
+# Validations performed
+# Drops all samples without valid date
+# Drops all samples which doesnt have a corresponding normalized fasta sequence in the fasta provided
 
 import pandas as pd
 import numpy as np 
