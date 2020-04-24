@@ -7,6 +7,7 @@ Parse excel to tsv
 ## Updates:
 # Currently only works with acknowlegement table and normalized fasta from GISAID.
 # Acknowledgement table has missing columns age, sex, region_exposure, country_exposure , submission_data
+# Currently imputes age to be a random value between 1 - 89
 # Currently imputes submission date to be 2 weeks from sample collection data
 # Region exposure and country exposure to region and country values  ( only very few samples have updated values )
 
