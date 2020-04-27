@@ -25,7 +25,7 @@ rule download_gisaid:
     shell:
         """
         ## TODO : Add download script from GISAID ; Temporary only copying
-        cp /home/idies/workspace/Storage/sramakr4/persistent/nextstrain_scripts/ncov/final/gisaid_cov2020_sequences.fasta {output.gi_sequences}
+        cp final/gisaid_cov2020_sequences.fasta {output.gi_sequences}
         curl -o {output.gi_metadata:q} https://raw.githubusercontent.com/nextstrain/ncov/master/data/metadata.tsv
         
         """
