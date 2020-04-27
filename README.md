@@ -1,3 +1,5 @@
+## Install Nextstrian from https://nextstrain.org/docs/getting-started/local-installation
+
 ## Customizing Local Nextstrain build
 
 git clone https://github.com/srividya22/ncov.git </br>
@@ -5,19 +7,30 @@ cd ncov </br>
 chmod 755 setup_local.sh </br>
 ./setup_local.sh </br>
 
--Update local paths in config/Snakefile_local.file </br>
--Update local path to GISAID data in Line: 28 in Snakemake_prepare </br>
+-Update local file paths in config/Snakefile_local.file </br>
 
-## Add forked repo as upstream to pull latest nextstrain changes
-git remote add upstream https://github.com/nextstrain/ncov.git</br>
+## Running Local Nextstrain
+
+## Download GISAID data from GISAID https://www.gisaid.org/
+mkdir -p final </br>
+cp gisaid_cov2020_sequences.fasta final/gisaid_cov2020_sequences.fasta </br>
+
+## Augur build
+snakemake -j 4 --forceall --snakefile Snakefile_prepare
+snakemake -j 4 --forceall --snakefile Snakefile_main
+
+## View nextstrain
+nextstrain view ./auspice
 
 ## To update nextstrain/ncov latest code
+git remote add upstream https://github.com/nextstrain/ncov.git</br>
 git fetch upstream </br>
 git pull upstream master </br>
 
 ## Todo List
 - Automate GISAID data download in Snakemake_prepare
 - Add Snakefile for deploy and archive 
+- Additional validation on GISAID metadata
 
 ## Setup Remote 
 
