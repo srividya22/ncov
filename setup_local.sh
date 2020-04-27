@@ -13,7 +13,7 @@ echo "local_gisaid_metadata: <path to your local metadata tsv in gisaid format>"
 
 # Replace config to local config
 sed -i 's/config\/Snakefile.yaml/config\/Snakefile_local.yaml/g' Snakefile_main
-
+sed -i '1i include: "Snakefile_prepare"' Snakefile_main 
 # Replace download tags
 AWS_SEQ='aws s3 cp s3:\/\/nextstrain\-ncov\-private\/sequences.fasta'
 AWS_META='aws s3 cp s3:\/\/nextstrain\-ncov\-private\/metadata.tsv'

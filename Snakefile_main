@@ -1,3 +1,4 @@
+include: "Snakefile_prepare"
 from os import environ
 from packaging import version
 from socket import getfqdn
