@@ -15,11 +15,11 @@ git remote add upstream https://github.com/nextstrain/ncov.git</br>
 git fetch upstream </br>
 git pull upstream master </br>
 
-## TODO List
+## Todo List
 - Automate GISAID data download in Snakemake_prepare
 - Add Snakefile for deploy and archive 
 
-# Setup Remote 
+## Setup Remote 
 
 ## About  
 
