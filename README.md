@@ -19,8 +19,8 @@ mkdir -p final </br>
 cp gisaid_cov2020_sequences.fasta final/gisaid_cov2020_sequences.fasta </br>
 
 ## Augur build
-snakemake -j 4 --forceall --snakefile Snakefile_prepare
-snakemake -j 4 --forceall --snakefile Snakefile_main
+snakemake -j 4 --forceall --snakefile Snakefile_prepare </br>
+snakemake -j 4 --forceall --snakefile Snakefile_main </br>
 
 ## View nextstrain
 nextstrain view ./auspice
