@@ -12,8 +12,8 @@ chmod 755 setup_local.sh </br>
 git remote add upstream https://github.com/nextstrain/ncov.git</br>
 
 ## To update nextstrain/ncov latest code
-git fetch upstream
-git pull upstream master 
+git fetch upstream </br>
+git pull upstream master </br>
 
 ## TODO List
 - Automate GISAID data download in Snakemake_prepare
