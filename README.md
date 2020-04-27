@@ -1,3 +1,26 @@
+## Customizing Local Nextstrain build
+
+git clone https://github.com/srividya22/ncov.git </br>
+cd ncov </br>
+chmod 755 setup_local.sh </br>
+./setup_local.sh </br>
+
+#Update local paths in config/Snakefile_local.file 
+#Update local path to GISAID data in Line: 28 in Snakemake_prepare
+
+# Add forked repo as upstream to pull latest nextstrain changes
+git remote add upstream https://github.com/nextstrain/ncov.git</br>
+
+# To update nextstrain/ncov latest code
+git fetch upstream
+git pull upstream master 
+
+## TODO List
+- Automate GISAID data download in Snakemake_prepare
+- Add Snakefile for deploy and archive 
+
+# Setup Remote 
+
 ## About  
 
 This is a [Nextstrain](https://nextstrain.org) build for novel coronavirus, alternately known as hCoV-19 or SARS-CoV-2 that is responsible for the COVID-19 pandemic. This build is visible at [nextstrain.org/ncov](https://nextstrain.org/ncov).
