@@ -10,9 +10,7 @@ npm install --global auspice </br>
 
 Install seqtk : https://github.com/lh3/seqtk. </br>
 conda install -c bioconda seqtk </br>
-
-# Optionally, if you want to use the nextstrain command
-nextstrain check-setup --set-default
+nextstrain check-setup --set-default </br>
 
 ## Customizing Local Nextstrain build
 
