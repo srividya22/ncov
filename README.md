@@ -8,10 +8,10 @@ chmod 755 setup_local.sh </br>
 #Update local paths in config/Snakefile_local.file 
 #Update local path to GISAID data in Line: 28 in Snakemake_prepare
 
-# Add forked repo as upstream to pull latest nextstrain changes
+## Add forked repo as upstream to pull latest nextstrain changes
 git remote add upstream https://github.com/nextstrain/ncov.git</br>
 
-# To update nextstrain/ncov latest code
+## To update nextstrain/ncov latest code
 git fetch upstream
 git pull upstream master 
 
