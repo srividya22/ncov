@@ -8,7 +8,7 @@ conda env create -f nextstrain.yml </br>
 conda activate nextstrain </br> 
 npm install --global auspice </br>
 
-Install seqtk : https://github.com/lh3/seqtk
+Install seqtk : https://github.com/lh3/seqtk. </br>
 conda install -c bioconda seqtk </br>
 
 # Optionally, if you want to use the nextstrain command
