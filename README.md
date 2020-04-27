@@ -2,14 +2,14 @@
 
 ## Install Dependencies : 
 
-Nextstrain Local installation : https://nextstrain.org/docs/getting-started/local-installation
-curl http://data.nextstrain.org/nextstrain.yml --compressed -o nextstrain.yml
-conda env create -f nextstrain.yml
-conda activate nextstrain
-npm install --global auspice
+Nextstrain Local installation : https://nextstrain.org/docs/getting-started/local-installation </br>
+curl http://data.nextstrain.org/nextstrain.yml --compressed -o nextstrain.yml </br> 
+conda env create -f nextstrain.yml </br>
+conda activate nextstrain </br> 
+npm install --global auspice </br>
 
 Install seqtk : https://github.com/lh3/seqtk
-conda install -c bioconda seqtk
+conda install -c bioconda seqtk </br>
 
 # Optionally, if you want to use the nextstrain command
 nextstrain check-setup --set-default
