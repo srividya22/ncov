@@ -4,11 +4,13 @@ location	Hefei
 location	Jingzhou
 location	Jiujiang
 location	Jian
+location	Pu'er
 location	Xinyu
 location	Shangrao
 location	Ganzhou
 location	Pingxiang
 location	Zhongxian
+location	Xishuangbanna
 location	Yongchuan
 location	Huizhou
 location	Shantou
@@ -32,7 +34,8 @@ location	Zhuhai
 location	Huaian
 location	Qingdao
 location	Guangzhou
-location	NanChang
+location	Zhengzhou
+location	Nanchang
 location	Foshan
 location	Hong Kong
 location	Taipei
@@ -48,6 +51,11 @@ location	Kathmandu
 location	Thanh Hoa
 location	Hanoi
 location	Bangkok
+location	Hyderabad
+location	Kolkata
+location	East Medinipur
+location	Tehatta
+location	Darjeeling
 location	Singapore
 location	Gold Coast
 location	Sydney
@@ -64,6 +72,7 @@ location	Riyadh
 location	Hawali
 location	Dasman
 location	Ulan-Ude
+location	Bela - Ledec na Sazavou
 location	Vienne
 location	Heinsberg District
 location	Heinsberg
@@ -183,10 +192,12 @@ location	Nottinghamshire
 location	Cardiff
 location	Rovaniemi
 location	Jönköping
-location	Helsinki
 location	Sao Paulo
 location	Brasilia
 location	Rio de Janeiro
+location	Bahia Blanca
+location	San Carlos de Bariloche
+location	Quilmes
 location	Florianopolis
 location	Niteroi
 location	Joinville
@@ -195,25 +206,42 @@ location	Manaus
 location	Feira de Santana
 location	Vila Velha
 location	Mexico City
+location	Alajuela
+location	San Rafael
+location	Cartago
+location	San Juan
+location	Heredia
 location	La Crosse County
 location	King County
+location	Whatcom County
+location	Yakima County
+location	Thurston County
+location	Skagit County
 location	Snohomish County
 location	Pierce County
 location	Solano County
 location	Sonoma County
 location	Orange County
 location	Kirkland
+location	Mason County
+location	Asotin County
+location	Benton County
+location	Kittitas County
 location	Seattle
 location	Los Angeles
 location	California
 location	Columbus
+location	Cincinnati
 location	Ketchikan
 location	Fairbanks
+location	Juneau
+location	Eielson AFB
 location	Anchorage
 location	San Francisco
 location	San Diego County
+location	San Diego
+location	San Mateo County
 location	Marin County
-location	San Francisco County
 location	San Joaquin County
 location	Sacramento County
 location	Santa Clara County
@@ -253,6 +281,8 @@ location	Washington County
 location	Albany County
 location	Putnam County
 location	New York City
+location	Fairfield County
+location	Bergen County
 location	Clinton County
 location	Broome County
 location	Jefferson County
@@ -264,6 +294,7 @@ location	Allamakee County
 location	Winneshiek County
 location	Jackson County
 location	Adams County
+location	New Orleans
 location	Thiensville
 location	Racine
 location	Cudahy
@@ -287,8 +318,12 @@ location	Glendale
 location	Accra
 
 
+
+
 division	China
 division	Hubei
+division	Guangxi
+division	Henan
 division	Beijing
 division	Anhui
 division	Jiangxi
@@ -306,10 +341,13 @@ division	Hong Kong
 division	Taiwan
 division	Taipei
 division	New Taipei City
+division	Philippines
+division	Manila
 division	Keelung
 division	Taoyuan
 division	Aichi
 division	Tokyo
+division	Japan
 division	Chiba
 division	Ishikawa
 division	Saitama
@@ -321,18 +359,25 @@ division	Gyeonggi
 division	Chungcheongnam
 division	Seoul
 division	South Korea
+division	Nepal
+division	India
+division	Telangana
+division	Sri Lanka
 division	Selangor
 division	Kuala Lumpur
 division	Kathmandu
 division	Karnataka
 division	Gujarat
 division	Kerala
+division	West Bengal
 division	Kochi
 division	Khyber Pakhtunkhwa
 division	Ramat Gan
 division	Iran
 division	Doha
 division	Kuwait
+division	Amman
+division	Irbid
 division	Kayseri
 division	Istanbul
 division	Afyon
@@ -350,24 +395,37 @@ division	Kastamonu
 division	Balikesir
 division	Gilgit Baltistan
 division	Tbilisi
+division	Vietnam
 division	Thanh Hoa
 division	Ho Chi Minh City
 division	Vinhphuc
 division	Red River Delta
 division	Quangning
+division	Cambodia
 division	Sihanoukville
 division	Nonthaburi
+division	Thailand
 division	Bangkok
+division	Malaysia
 division	Singapore
+division	Australia
 division	Queensland
 division	Northern Territory
 division	New South Wales
 division	Western Australia
 division	Victoria
 division	Wellington
+division	New Zealand
 division	Otago
 division	Auckland
+division	Saudi Arabia
 division	Riyadh
+division	Qatar
+division	Israel
+division	Jordan
+division	Turkey
+division	Pakistan
+division	Russia
 division	Saint-Petersburg
 division	Moscow
 division	Moscow Region
@@ -394,16 +452,32 @@ division	Republic of Sakha
 division	Republic of Kabardino-Balkaria
 division	Republic of Crymea
 division	Republic of Tatarstan
+division	Slovenia
+division	Poland
+division	Belarus
+division	Estonia
 division	Europe
+division	Iceland
 division	Reykjavik
+division	Helsinki
+division	Latvia
+division	Riga
+division	Lithuania
+division	Vilnius
+division	Norway
 division	Oslo
+division	Istria
+division	Hungary
 division	Central Hungary
 division	Baranya
 division	Kostoliste
 division	Kosice
+division	Slovakia
 division	Bratislava
 division	Malopolskie
+division	Czech Republic
 division	Prague
+division	Vysocina Region
 division	Martin
 division	Copenhagen
 division	Bretagne
@@ -417,6 +491,7 @@ division	Bretagne
 division	Bourgogne-France-Comté
 division	Normandie
 division	Grand Est
+division	Toulouse
 division	Auvergne Rhone Alpes
 division	Spain
 division	Castilla Y León
@@ -548,6 +623,7 @@ division	Baden-Wuerttemberg
 division	Munich
 division	North Rhine Westphalia
 division	Netherlands
+division	Milheeze
 division	Utrecht
 division	Deinze
 division	Antwerp
@@ -610,6 +686,7 @@ division	Northern Ireland
 division	England
 division	Nottinghamshire
 division	Wales
+division	Ireland
 division	Dublin
 division	Tipperary
 division	Louth
@@ -620,7 +697,9 @@ division	Scotland
 division	Småland
 division	Vasterbotten
 division	Halland
+division	Czech Republic
 division	Budapest
+division	Sweden
 division	Stockholm
 division	Ostergotland
 division	Sormland
@@ -628,13 +707,23 @@ division	Varmland
 division	Gavleborgs lan
 division	Orebro lan
 division	Norrbotten
+division	Greece
 division	Finland
 division	Denmark
 division	Portugal
+division	Egypt
+division	Nigeria
+division	Ghana
+division	Senegal
+division	Gambia
+division	Algeria
 division	Lagos
+division	Democratic Republic of the Congo
 division	Kinshasa
 division	Sud Kivu
+division	South Africa
 division	KwaZulu-Natal
+division	Gauteng
 division	Greater Accra
 division	West Coast Region
 division	Mbour
@@ -644,6 +733,9 @@ division	St-Louis
 division	Thies
 division	Blida
 division	Boufarik
+division	Chile
+division	Ecuador
+division	Brazil
 division	Santiago
 division	Talca
 division	Sao Paulo
@@ -655,18 +747,32 @@ division	Rio Grande do Sul
 division	Rio de Janeiro
 division	Santa Catarina
 division	Alagoas
+division	Argentina
+division	Ciudad Autonoma de Buenos Aires
+division	Buenos Aires
+division	Rio Negro
 division	Distrito Federal
+division	Uruguay
+division	Colombia
 division	Amazonas State
 division	Antioquia
 division	Bogota
 division	Quito
 division	Guayas
 division	Pichincha
+division	Peru
 division	Lima
 division	Montevideo
 division	Panama City
+division	Panama
+division	San Rafael
+division	La Union
+division	Tibas
+division	Orotina
+division	Mexico
 division	Mexico City
 division	Estado de Mexico
+division	Chiapas
 division	Chihuahua
 division	Puebla
 division	Queretaro
@@ -707,7 +813,9 @@ division	Grand Princess
 division	Oregon
 division	Washington
 division	Hawaii
+division	Puerto Rico
 division	Alaska
+division	Canada
 division	Nova Scotia
 division	New Brunswick
 division	Ontario
@@ -735,9 +843,11 @@ country	Singapore
 country	Australia
 country	New Zealand
 country	Saudi Arabia
+country	Qatar
 country	Kuwait
 country	Iran
 country	Israel
+country	Jordan
 country	Turkey
 country	Pakistan
 country	Georgia
@@ -747,6 +857,9 @@ country	Latvia
 country	Slovakia
 country	Slovenia
 country	Poland
+country	Belarus
+country	Estonia
+country	Lithuania
 country	Hungary
 country	Croatia
 country	France
@@ -785,6 +898,7 @@ country	Argentina
 country	Uruguay
 country	Colombia
 country	Panama
+country	Costa Rica
 country	Mexico
 country	USA
 country	Canada
@@ -801,5 +915,4 @@ region	Asia
 region	Africa
 region	Europe
 region	North America
-region	Central America
 region	South America
