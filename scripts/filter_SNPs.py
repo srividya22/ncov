@@ -68,6 +68,8 @@ if __name__ == "__main__":
     exclude_list = pd.read_table(exclude_samples,header=None)
     print("Total SNPs :" +str(snps_vcf.shape[0]) + " ; Samples : " + "\t" + str(snps_vcf.shape[1]-9) )
 
+    ex_list =  [ x for x in exclude_list[0] if x in snps_vcf.columns ] 
+
     # get SNP postions
     snps = snps_vcf.POS.to_list()
     msa_alleles = snps_vcf.REF.to_list()
@@ -91,7 +93,8 @@ if __name__ == "__main__":
                msa_alt_dict[key] = msa_alt_dict[key].replace(ref_dict[key],msa_dict[key])
                print( old + " to " + msa_alt_dict[key])
   
-    snps_vcf.drop(exclude_list[0],axis=1, inplace=True)
+    #snps_vcf.drop(exclude_list[0],axis=1, inplace=True)
+    snps_vcf.drop(ex_list,axis=1, inplace=True)
     snps_vcf['REF'] = ref_alleles
     snps_vcf['ALT'] = [ msa_alt_dict[i] for i in sorted(msa_alt_dict.keys())]
 

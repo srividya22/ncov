@@ -122,7 +122,7 @@ if __name__ == "__main__":
         
     # Rename columns to nextstrain columns
     data_tsv=data_tsv.rename(columns = {'Virus name' : 'strain',
-                                               'Accession ID':'gisaid_epi_isl' ,
+                                               #'Accession ID':'gisaid_epi_isl' ,
                                                'Originating lab' : 'originating_lab', 
                                                'Submitting lab' : 'submitting_lab', 
                                                'Authors' : 'authors' ,
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     #print(data_tsv['Sample ID given by the provider'])
     #print(data_tsv['gisaid_epi_isl'].tolist())
     data_tsv.drop('Sample ID given by the provider',axis =1 , inplace = True)
-    
+    data_tsv['gisaid_epi_isl'] = ''
     data_tsv['virus'] = 'ncov'
     data_tsv['genbank_accession'] = "?"
     data_tsv['region_exposure'] = data_tsv['region']
