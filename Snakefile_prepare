@@ -55,6 +55,7 @@ rule normalize_local:
     input:
         l_sequences = config["local_sequences"],
         l_metadata = config["local_gisaid_metadata"]
+        min_length = 29902
     output:
         lf_sequences = "final/JHU_sequences.fasta",
         lf_tmp_meta = "final/JHU_nextstrain.tsv",
@@ -63,7 +64,7 @@ rule normalize_local:
         """
         echo "Running Cmd : scripts/parse_meta_from_GISAID_to_nextstrain.py -in {input.l_metadata} -g {input.l_sequences} -o {output.lf_tmp_meta}"
         scripts/parse_meta_from_GISAID_to_nextstrain.py -in {input.l_metadata} -g {input.l_sequences} -o {output.lf_tmp_meta}
-        echo "Running Cmd : scripts/normalize_and_filter_gisaid_fasta.sh {input.l_sequences} {output.lf_tmp_meta} {output.lf_sequences} {output.lf_metadata}"
+        echo "Running Cmd : scripts/normalize_and_filter_gisaid_fasta.sh {input.l_sequences} {output.lf_tmp_meta} {output.lf_sequences} {output.lf_metadata} {input.min_length}"
         scripts/normalize_and_filter_gisaid_fasta.sh {input.l_sequences} {output.lf_tmp_meta} {output.lf_sequences} {output.lf_metadata}
         """
         
