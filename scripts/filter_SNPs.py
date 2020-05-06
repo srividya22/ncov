@@ -35,7 +35,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script to Parse augur json files")
     parser.add_argument("-in",dest="vcf",type=str, required=True, help="Path to the vcf from snp-sites")
     parser.add_argument("-r",dest="ref",type=str, required=True, help="Path to the reference sequence")
-    parser.add_argument("-l",dest="exclude_samples",type=str, required=True, help="Path to list of samples to exclude")
+    parser.add_argument("-l",dest="exclude_samples",type=str, required=False, help="Path to list of samples to exclude")
     parser.add_argument("-m",dest="clades",type=str,required=True, help="Path to tab limited file of major clade specific SNPs")
     parser.add_argument("-c", metavar="15",dest="cov", type=float, default=15, help='Coverage threshold to determine SNP importance')
     parser.add_argument("-o",dest="out", type=str, default="output filtered vcf", help="Output vcf file")
@@ -65,10 +65,10 @@ if __name__ == "__main__":
     print("Total Number of SNPs in major clades :" + str(len(clade_nuc)))
 
     snps_vcf = pd.read_table(vcf_file, skiprows=3)
-    exclude_list = pd.read_table(exclude_samples,header=None)
     print("Total SNPs :" +str(snps_vcf.shape[0]) + " ; Samples : " + "\t" + str(snps_vcf.shape[1]-9) )
-
-    ex_list =  [ x for x in exclude_list[0] if x in snps_vcf.columns ] 
+    if exclude_samples: 
+    	exclude_list = pd.read_table(exclude_samples,header=None)
+    	ex_list =  [ x for x in exclude_list[0] if x in snps_vcf.columns ] 
 
     # get SNP postions
     snps = snps_vcf.POS.to_list()
@@ -94,7 +94,8 @@ if __name__ == "__main__":
                print( old + " to " + msa_alt_dict[key])
   
     #snps_vcf.drop(exclude_list[0],axis=1, inplace=True)
-    snps_vcf.drop(ex_list,axis=1, inplace=True)
+    if exclude_samples:
+    	snps_vcf.drop(ex_list,axis=1, inplace=True)
     snps_vcf['REF'] = ref_alleles
     snps_vcf['ALT'] = [ msa_alt_dict[i] for i in sorted(msa_alt_dict.keys())]
 
