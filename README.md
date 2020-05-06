@@ -53,7 +53,11 @@ This is a [Nextstrain](https://nextstrain.org) build for novel coronavirus, alte
 
 ### Data
 
-The hCoV-19 / SARS-CoV-2 genomes were generously shared via GISAID. We gratefully acknowledge the Authors, Originating and Submitting laboratories of the genetic sequence and metadata made available through GISAID on which this research is based. For a full list of attributions please see the [metadata file](data/metadata.tsv).
+The hCoV-19 / SARS-CoV-2 genomes were generously shared via GISAID. We gratefully acknowledge the Authors, Originating and Submitting laboratories of the genetic sequence and metadata made available through GISAID on which this research is based.
+
+In order to download the GISAID data to run yourself, please see [Running a SARS-CoV-2 analysis](./docs/running.md)
+
+> Please note that `data/metadata.tsv` is no longer included as part of this repo and should be downloaded directly from GISAID.
 
 ### Bioinformatics notes
 
@@ -63,10 +67,9 @@ If you'd like to customize and run the analysis yourself, please see the [develo
 
 ## How to run using your own data
 
-Please see
-- [How to format the metadata](./docs/metadata.md)
-- [Running a SARS-CoV-2 analysis](./docs/running.md)
-
+  - [How to format the metadata](./docs/metadata.md)
+  - [Running a SARS-CoV-2 analysis](./docs/running.md)
+  - [Understanding the structure of the workflow](./docs/workflow_structure.md) including directory structure and the order in which Snakemake runs rules
 
 ## Contributing
 
