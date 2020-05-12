@@ -54,10 +54,13 @@ location	Bangkok
 location	Hyderabad
 location	Noida
 location	Ahmedabad
+location	Surat
 location	Gandhinagar
 location	Mansa
 location	Kolkata
 location	East Medinipur
+location	South 24 Parganas
+location	Howrah
 location	Tehatta
 location	Darjeeling
 location	Singapore
@@ -190,6 +193,8 @@ location	Valencia
 location	Luxembourg
 location	England
 location	South Yorkshire
+location	London
+location	Northamtonshire
 location	Derbyshire
 location	Yorkshire
 location	Nottinghamshire
@@ -238,10 +243,14 @@ location	Columbus
 location	Cincinnati
 location	Ketchikan
 location	Fairbanks
+location	Mat-Su
+location	Interior Alaska
+location	Southeast Alaska
 location	Wasilla
 location	Juneau
 location	Eielson AFB
 location	Anchorage
+location	Elmendorf AFB
 location	San Francisco
 location	San Diego County
 location	San Diego
@@ -300,6 +309,7 @@ location	Winona County
 location	Allamakee County
 location	Winneshiek County
 location	Jackson County
+location	Florida
 location	Adams County
 location	New Orleans
 location	East Feliciana Parish
@@ -309,6 +319,8 @@ location	Bienville Parish
 location	East Baton Rouge Parish
 location	Livingston Parish
 location	Iberville Parish
+location	Pittsburgh
+location	Fayette County
 location	Thiensville
 location	Racine
 location	Cudahy
@@ -316,6 +328,16 @@ location	Mequon
 location	Wauwatosa
 location	Greenfield
 location	Milwaukee
+location	Brown Deer
+location	Greater Milwaukee Area
+location	Slinger
+location	River Hills
+location	Bayside
+location	Vernon County
+location	Trempealeau County
+location	Juneau County
+location	Saukville
+location	Hartford
 location	Campbellsport
 location	Jackson
 location	Oak Creek
@@ -329,7 +351,11 @@ location	South Milwaukee
 location	Brookfield
 location	Elm Grove
 location	Glendale
+location	Columbia County
+location	Multnomah County
+location	Wasco County
 location	Accra
+
 
 
 
@@ -379,7 +405,6 @@ division	Kathmandu
 division	Sri Lanka
 division	Selangor
 division	Kuala Lumpur
-division	India
 division	Uttar Pradesh
 division	Delhi
 division	Ladakh
@@ -398,6 +423,9 @@ division	Karnataka
 division	Gujarat
 division	Kerala
 division	West Bengal
+division	Assam
+division	Rajsathan
+division	Madhya Pradesh
 division	Kochi
 division	Khyber Pakhtunkhwa
 division	Ramat Gan
@@ -434,11 +462,14 @@ division	Cambodia
 division	Sihanoukville
 division	Nonthaburi
 division	Thailand
+division	Myanmar
 division	Bangkok
 division	Malaysia
 division	Singapore
 division	Brunei
 division	Jakarta
+division	Surabaya
+division	India
 division	Australia
 division	Queensland
 division	Northern Territory
@@ -456,8 +487,17 @@ division	Qatar
 division	Israel
 division	Jordan
 division	Turkey
+division	Styria
+division	Denizli
+division	Tokat
+division	Agri
+division	Mardin
+division	Tekirdag
 division	Adıyaman
 division	Pakistan
+division	Jeddah
+division	Madinah
+division	Makkah
 division	Nur-Sultan
 division	Russia
 division	Saint-Petersburg
@@ -488,19 +528,23 @@ division	Republic of Crymea
 division	Republic of Tatarstan
 division	Slovenia
 division	Poland
+division	Dolnoslaskie
 division	Belarus
 division	Estonia
+division	Latvia
 division	Europe
 division	Iceland
 division	Reykjavik
 division	Helsinki
-division	Latvia
 division	Riga
 division	Lithuania
 division	Vilnius
 division	Norway
 division	Oslo
 division	Istria
+division	Serbia
+division	Kraljevo
+division	Novi Pazar
 division	Hungary
 division	Central Hungary
 division	Baranya
@@ -768,6 +812,7 @@ division	Democratic Republic of the Congo
 division	Kinshasa
 division	Sud Kivu
 division	South Africa
+division	Eastern Cape
 division	KwaZulu-Natal
 division	Gauteng
 division	Greater Accra
@@ -823,7 +868,7 @@ division	Chihuahua
 division	Puebla
 division	Queretaro
 division	USA
-division	District of Columbia
+division	Washington DC
 division	Maryland
 division	Texas
 division	Missouri
@@ -854,6 +899,7 @@ division	Arizona
 division	Utah
 division	Wyoming
 division	Idaho
+division	Montana
 division	California
 division	Grand Princess
 division	Oregon
@@ -885,6 +931,7 @@ country	Sri Lanka
 country	Vietnam
 country	Cambodia
 country	Thailand
+country	Myanmar
 country	Malaysia
 country	Singapore
 country	Brunei
@@ -901,8 +948,10 @@ country	Jordan
 country	Turkey
 country	Pakistan
 country	Kazakhstan
+country	Kyrgyzstan
 country	Georgia
 country	Russia
+country	Serbia
 country	Europe
 country	Latvia
 country	Slovakia

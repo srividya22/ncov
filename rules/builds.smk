@@ -89,8 +89,7 @@ rule align:
             --reference-sequence {input.reference} \
             --output {output.alignment} \
             --nthreads {threads} \
-            --remove-reference \
-            --fill-gaps 2>&1 | tee {log}
+            --remove-reference 2>&1 | tee {log}
         """
 
 def _get_alignments(wildcards):
@@ -138,6 +137,7 @@ rule mask:
             --mask-from-beginning {params.mask_from_beginning} \
             --mask-from-end {params.mask_from_end} \
             --mask-sites {params.mask_sites} \
+            --mask-terminal-gaps \
             --output {output.alignment} 2>&1 | tee {log}
         """
 
@@ -325,12 +325,6 @@ rule tree:
             --output {output.tree} \
             --nthreads {threads} 2>&1 | tee {log}
         """
-
-def _get_metadata_by_wildcards(wildcards):
-    if wildcards.region == "global":
-        return rules.download.output.metadata
-    else:
-        return rules.adjust_metadata_regions.output.metadata
 
 rule refine:
     message:

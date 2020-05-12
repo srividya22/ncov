@@ -473,6 +473,9 @@ Senegal/610/2020
 USA/WI-GMF-00384/2020
 USA/WA-UW-1572/2020
 England/201360246/2020
+Turkey/VETAL-AHM1/2020
+SouthAfrica/R05475/2020
+USA/OH-OSUP0014/2020
 
 # Excluding because seem to be too divergent - worth double checking
 Shandong/LY002/2020
@@ -637,11 +640,17 @@ USA/UNKNOWN-UW-5614/2020
 USA/UNKNOWN-UW-5742/2020
 USA/UNKNOWN-UW-5769/2020
 USA/UNKNOWN-UW-581/2020
+USA/UNKNOWN-UW-3982/2020
+USA/UNKNOWN-UW-4089/2020
+USA/UNKNOWN-UW-4097/2020
+USA/UNKNOWN-UW-6504/2020
 USA/UF-1/2020
 USA/UF-2/2020
 USA/FL-2/2020
 USA/FL-UF1/2020
 USA/FL-UF2/2020
+
+
 
 # causes IQTREE error: ERROR: b'ERROR: Sequence Norway_X_X_1539_X_X_2020 has invalid character I at site 20199
 # The GISAID data was subsequently updated => TODO check if this sequence has been fixed
