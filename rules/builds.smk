@@ -15,7 +15,6 @@ rule filter:
         """
         Filtering to
           - excluding strains in {input.exclude}
-          - minimum genome length of {params.min_length}
         """
     input:
         sequences = rules.download.output.sequences,
@@ -28,9 +27,7 @@ rule filter:
         "logs/filtered.txt"
     params:
         min_length = config["filter"]["min_length"],
-        exclude_where = config["filter"]["exclude_where"],
-        group_by = config["filter"]["group_by"],
-        sequences_per_group = config["filter"]["sequences_per_group"]
+        exclude_where = config["filter"]["exclude_where"]
     conda: config["conda_environment"]
     shell:
         """
@@ -41,10 +38,87 @@ rule filter:
             --exclude {input.exclude} \
             --exclude-where {params.exclude_where}\
             --min-length {params.min_length} \
-            --group-by {params.group_by} \
-            --sequences-per-group {params.sequences_per_group} \
             --output {output.sequences} 2>&1 | tee {log}
         """
+
+rule excluded_sequences:
+    message:
+        """
+        Generating fasta file of excluded sequences
+        """
+    input:
+        sequences = rules.download.output.sequences,
+        metadata = rules.download.output.metadata,
+        include = config["files"]["exclude"]
+    output:
+        sequences = "results/excluded.fasta"
+    log:
+        "logs/excluded.txt"
+    conda: config["conda_environment"]
+    shell:
+        """
+        augur filter \
+            --sequences {input.sequences} \
+            --metadata {input.metadata} \
+	    --min-length 50000 \
+            --include {input.include} \
+            --output {output.sequences} 2>&1 | tee {log}
+        """
+
+rule align_excluded:
+    message:
+        """
+        Aligning excluded sequences to {input.reference}
+          - gaps relative to reference are considered real
+        """
+    input:
+        sequences = rules.excluded_sequences.output.sequences,
+        reference = config["files"]["reference"]
+    output:
+        alignment = "results/excluded_alignment.fasta"
+    log:
+        "logs/align_excluded.txt"
+    threads: 2
+    conda: config["conda_environment"]
+    shell:
+        """
+        augur align \
+            --sequences {input.sequences} \
+            --reference-sequence {input.reference} \
+            --output {output.alignment} \
+            --nthreads {threads} \
+            --remove-reference 2>&1 | tee {log}
+        """
+
+rule diagnose_excluded:
+    message: "Scanning excluded sequences {input.alignment} for problematic sequences"
+    input:
+        alignment = rules.align_excluded.output.alignment,
+        metadata = rules.download.output.metadata,
+        reference = config["files"]["reference"]
+    output:
+        diagnostics = "results/excluded-sequence-diagnostics.tsv",
+        flagged = "results/excluded-flagged-sequences.tsv",
+        to_exclude = "results/check_exclusion.txt"
+    log:
+        "logs/diagnose-excluded.txt"
+    params:
+        mask_from_beginning = config["mask"]["mask_from_beginning"],
+        mask_from_end = config["mask"]["mask_from_end"]
+    conda: config["conda_environment"]
+    shell:
+        """
+        {python:q} scripts/diagnostic.py \
+            --alignment {input.alignment} \
+            --metadata {input.metadata} \
+            --reference {input.reference} \
+            --mask-from-beginning {params.mask_from_beginning} \
+            --mask-from-end {params.mask_from_end} \
+            --output-flagged {output.flagged} \
+            --output-diagnostics {output.diagnostics} \
+            --output-exclusion-list {output.to_exclude} 2>&1 | tee {log}
+        """
+
 
 checkpoint partition_sequences:
     input:
@@ -58,7 +132,7 @@ checkpoint partition_sequences:
     conda: config["conda_environment"]
     shell:
         """
-        python3 scripts/partition-sequences.py \
+        {python:q} scripts/partition-sequences.py \
             --sequences {input.sequences} \
             --sequences-per-group {params.sequences_per_group} \
             --output-dir {output.split_sequences} 2>&1 | tee {log}
@@ -111,6 +185,59 @@ rule aggregate_alignments:
         cat {input.alignments} > {output.alignment} 2> {log}
         """
 
+rule diagnostic:
+    message: "Scanning aligned sequences {input.alignment} for problematic sequences"
+    input:
+        alignment = rules.aggregate_alignments.output.alignment,
+        metadata = rules.download.output.metadata,
+        reference = config["files"]["reference"]
+    output:
+        diagnostics = "results/sequence-diagnostics.tsv",
+        flagged = "results/flagged-sequences.tsv",
+        to_exclude = "results/to-exclude.txt"
+    log:
+        "logs/diagnostics.txt"
+    params:
+        mask_from_beginning = config["mask"]["mask_from_beginning"],
+        mask_from_end = config["mask"]["mask_from_end"]
+    conda: config["conda_environment"]
+    shell:
+        """
+        {python:q} scripts/diagnostic.py \
+            --alignment {input.alignment} \
+            --metadata {input.metadata} \
+            --reference {input.reference} \
+            --mask-from-beginning {params.mask_from_beginning} \
+            --mask-from-end {params.mask_from_end} \
+            --output-flagged {output.flagged} \
+            --output-diagnostics {output.diagnostics} \
+            --output-exclusion-list {output.to_exclude} 2>&1 | tee {log}
+        """
+
+rule refilter:
+    message:
+        """
+        excluding sequences flagged in the diagnostic step in file {input.exclude}
+        """
+    input:
+        sequences = rules.aggregate_alignments.output.alignment,
+        metadata = rules.download.output.metadata,
+        exclude = rules.diagnostic.output.to_exclude
+    output:
+        sequences = "results/aligned-filtered.fasta"
+    log:
+        "logs/refiltered.txt"
+    conda: config["conda_environment"]
+    shell:
+        """
+        augur filter \
+            --sequences {input.sequences} \
+            --metadata {input.metadata} \
+            --exclude {input.exclude} \
+            --output {output.sequences} 2>&1 | tee {log}
+        """
+
+
 rule mask:
     message:
         """
@@ -120,7 +247,7 @@ rule mask:
           - masking other sites: {params.mask_sites}
         """
     input:
-        alignment = rules.aggregate_alignments.output.alignment
+        alignment = rules.refilter.output.sequences
     output:
         alignment = "results/masked.fasta"
     log:
@@ -132,7 +259,7 @@ rule mask:
     conda: config["conda_environment"]
     shell:
         """
-        python3 scripts/mask-alignment.py \
+        {python:q} scripts/mask-alignment.py \
             --alignment {input.alignment} \
             --mask-from-beginning {params.mask_from_beginning} \
             --mask-from-end {params.mask_from_end} \
@@ -141,43 +268,79 @@ rule mask:
             --output {output.alignment} 2>&1 | tee {log}
         """
 
-def _get_group_by_wildcards(wildcards):
-    region_key = f"group_by_{wildcards.region}"
+def _get_subsampling_settings(wildcards):
+    # Allow users to override default subsampling with their own settings keyed
+    # by location type and name. For example, "region_europe" or
+    # "country_iceland". Otherwise, default to settings for the location type.
+    subsampling_scheme = _get_subsampling_scheme_by_build_name(wildcards.build_name)
+    subsampling_settings = config["subsampling"][subsampling_scheme]
 
-    if region_key in config["subsample_focus"]:
-        return config["subsample_focus"][region_key]
+    if hasattr(wildcards, "subsample"):
+        return subsampling_settings[wildcards.subsample]
     else:
-        return config["subsample_focus"]["group_by"]
+        return subsampling_settings
 
-def _get_sequences_per_group_by_wildcards(wildcards):
-    if wildcards.region == "global":
-        return config["subsample_focus"]["seq_per_group_global"]
+
+def get_priorities(wildcards):
+    subsampling_settings = _get_subsampling_settings(wildcards)
+
+    if "priorities" in subsampling_settings and subsampling_settings["priorities"]["type"] == "proximity":
+        return f"results/{wildcards.build_name}/proximity_{subsampling_settings['priorities']['focus']}.tsv"
     else:
-        return config["subsample_focus"]["seq_per_group_regional"]
+        # TODO: find a way to make the list of input files depend on config
+        return config["files"]["include"]
 
-def _get_focus_exclude_argument_by_wildcards(wildcards):
-    if wildcards.region == "global":
+
+def get_priority_argument(wildcards):
+    subsampling_settings = _get_subsampling_settings(wildcards)
+
+    if "priorities" in subsampling_settings and subsampling_settings["priorities"]["type"] == "proximity":
+        return "--priority " + get_priorities(wildcards)
+    else:
         return ""
-    else:
-        return f"--exclude-where \"region!={wildcards.region.replace('-', ' ')}\""
 
-rule subsample_focus:
+
+def _get_specific_subsampling_setting(setting, optional=False):
+    def _get_setting(wildcards):
+        if optional:
+            value = _get_subsampling_settings(wildcards).get(setting, "")
+        else:
+            value = _get_subsampling_settings(wildcards)[setting]
+
+        if isinstance(value, str):
+            # Load build attributes including geographic details about the
+            # build's region, country, division, etc. as needed for subsampling.
+            build = config["builds"][wildcards.build_name]
+            value = value.format(**build)
+        else:
+            return value
+
+        # Check format strings that haven't been resolved.
+        if re.search(r'\{.+\}', value):
+            raise Exception(f"The parameters for the subsampling scheme '{wildcards.subsample}' of build '{wildcards.build_name}' reference build attributes that are not defined in the configuration file: '{value}'. Add these build attributes to the appropriate configuration file and try again.")
+
+        return value
+
+    return _get_setting
+
+rule subsample:
     message:
         """
-        Subsample all sequences into a focal set for {wildcards.region} with {params.sequences_per_group} per region
+        Subsample all sequences into a {wildcards.subsample} set for build '{wildcards.build_name}' with {params.sequences_per_group} per {params.group_by}
         """
     input:
         sequences = rules.mask.output.alignment,
         metadata = rules.download.output.metadata,
-        include = config["files"]["include"]
+        include = config["files"]["include"],
+        priorities = get_priorities
     output:
-        sequences = REGION_PATH + "subsample_focus.fasta"
-    log:
-        "logs/subsample_focus_{region}.txt"
+        sequences = "results/{build_name}/sample-{subsample}.fasta"
     params:
-        group_by = _get_group_by_wildcards,
-        sequences_per_group = _get_sequences_per_group_by_wildcards,
-        exclude_argument = _get_focus_exclude_argument_by_wildcards
+        group_by = _get_specific_subsampling_setting("group_by"),
+        sequences_per_group = _get_specific_subsampling_setting("seq_per_group"),
+        exclude_argument = _get_specific_subsampling_setting("exclude", optional=True),
+        include_argument = _get_specific_subsampling_setting("include", optional=True),
+        priority_argument = get_priority_argument
     conda: config["conda_environment"]
     shell:
         """
@@ -186,132 +349,103 @@ rule subsample_focus:
             --metadata {input.metadata} \
             --include {input.include} \
             {params.exclude_argument} \
+            {params.include_argument} \
+            {params.priority_argument} \
             --group-by {params.group_by} \
             --sequences-per-group {params.sequences_per_group} \
             --output {output.sequences} 2>&1 | tee {log}
         """
 
-rule make_priorities:
+rule proximity_score:
     message:
         """
         determine priority for inclusion in as phylogenetic context by
-        genetic similiarity to sequences in focal set for region '{wildcards.region}'.
+        genetic similiarity to sequences in focal set for build '{wildcards.build_name}'.
         """
     input:
         alignment = rules.mask.output.alignment,
         metadata = rules.download.output.metadata,
-        focal_alignment = rules.subsample_focus.output.sequences
+        reference = config["files"]["reference"],
+        focal_alignment = "results/{build_name}/sample-{focus}.fasta"
     output:
-        priorities = REGION_PATH + "subsampling_priorities.tsv"
+        priorities = "results/{build_name}/proximity_{focus}.tsv"
     log:
-        "logs/subsampling_priorities_{region}.txt"
+        "logs/subsampling_priorities_{build_name}_{focus}.txt"
     resources:
         mem_mb = 4000
     conda: config["conda_environment"]
     shell:
         """
-        python3 scripts/priorities.py --alignment {input.alignment} \
+        {python:q} scripts/priorities.py --alignment {input.alignment} \
             --metadata {input.metadata} \
+            --reference {input.reference} \
             --focal-alignment {input.focal_alignment} \
             --output {output.priorities} 2>&1 | tee {log}
         """
 
-def _get_context_exclude_argument_by_wildcards(wildcards):
-    if wildcards.region == "global":
-        return ""
-    else:
-        return f"--exclude-where \"region={wildcards.region.replace('-', ' ')}\""
+def _get_subsampled_files(wildcards):
+    subsampling_settings = _get_subsampling_settings(wildcards)
 
-rule subsample_context:
-    message:
-        """
-        Subsample the non-focal sequences to provide phylogenetic context for the region '{wildcards.region}' using {params.sequences_per_group} per {params.group_by}.
-        """
-    input:
-        sequences = rules.mask.output.alignment,
-        metadata = rules.download.output.metadata,
-        priorities = rules.make_priorities.output.priorities
-    output:
-        sequences = REGION_PATH + "subsample_context.fasta"
-    log:
-        "logs/subsample_context_{region}.txt"
-    params:
-        group_by = config["subsample_context"]["group_by"],
-        sequences_per_group = config["subsample_context"]["sequences_per_group"],
-        exclude_argument = _get_context_exclude_argument_by_wildcards
-    conda: config["conda_environment"]
-    shell:
-        """
-        augur filter \
-            {params.exclude_argument} \
-            --sequences {input.sequences} \
-            --metadata {input.metadata} \
-            --priority {input.priorities} \
-            --group-by {params.group_by} \
-            --sequences-per-group {params.sequences_per_group} \
-            --output {output.sequences} 2>&1 | tee {log}
-        """
+    return [
+        f"results/{wildcards.build_name}/sample-{subsample}.fasta"
+        for subsample in subsampling_settings
+    ]
 
-rule subsample_regions:
+rule combine_samples:
     message:
         """
         Combine and deduplicate FASTAs
         """
     input:
-        rules.subsample_focus.output.sequences,
-        rules.subsample_context.output.sequences
+        _get_subsampled_files
     output:
-        alignment = REGION_PATH + "subsampled_alignment.fasta"
+        alignment = "results/{build_name}/subsampled_alignment.fasta"
     log:
-        "logs/subsample_regions_{region}.txt"
+        "logs/subsample_regions_{build_name}.txt"
     conda: config["conda_environment"]
     shell:
         """
-        python3 scripts/combine-and-dedup-fastas.py \
+        {python:q} scripts/combine-and-dedup-fastas.py \
             --input {input} \
             --output {output} 2>&1 | tee {log}
         """
 
+# TODO: This will probably not work for build names like "country_usa" where we need to know the country is "USA".
 rule adjust_metadata_regions:
     message:
         """
-        Adjusting metadata for region '{wildcards.region}'
+        Adjusting metadata for build '{wildcards.build_name}'
         """
     input:
         metadata = rules.download.output.metadata
     output:
-        metadata = REGION_PATH + "metadata_adjusted.tsv"
+        metadata = "results/{build_name}/metadata_adjusted.tsv"
+    params:
+        region = lambda wildcards: config["builds"][wildcards.build_name]["region"]
     log:
-        "logs/adjust_metadata_regions_{region}.txt"
+        "logs/adjust_metadata_regions_{build_name}.txt"
     conda: config["conda_environment"]
     shell:
         """
-        python3 scripts/adjust_regional_meta.py \
-            --region "{wildcards.region}" \
+        {python:q} scripts/adjust_regional_meta.py \
+            --region {params.region:q} \
             --metadata {input.metadata} \
             --output {output.metadata} 2>&1 | tee {log}
         """
 
-def _get_alignments_for_tree(wildcards):
-    """Use all sequences for global builds. Use a specific subsampled set of
-    sequences for regional builds.
-    """
-    if wildcards.region == "global":
-        return rules.subsample_focus.output.sequences
-    else:
-        return rules.subsample_regions.output.alignment
-
 rule tree:
     message: "Building tree"
     input:
-        alignment = _get_alignments_for_tree
+        alignment = rules.combine_samples.output.alignment
     output:
-        tree = REGION_PATH + "tree_raw.nwk"
+        tree = "results/{build_name}/tree_raw.nwk"
+    params:
+        args = lambda w: config["tree"].get("tree-builder-args","") if "tree" in config else ""
     log:
-        "logs/tree_{region}.txt"
+        "logs/tree_{build_name}.txt"
     benchmark:
-        "benchmarks/tree_{region}.txt"
-    threads: 4
+        "benchmarks/tree_{build_name}.txt"
+    threads: 16
     resources:
         # Multiple sequence alignments can use up to 40 times their disk size in
         # memory, especially for larger alignments.
@@ -322,6 +456,7 @@ rule tree:
         """
         augur tree \
             --alignment {input.alignment} \
+            --tree-builder-args {params.args} \
             --output {output.tree} \
             --nthreads {threads} 2>&1 | tee {log}
         """
@@ -336,15 +471,15 @@ rule refine:
         """
     input:
         tree = rules.tree.output.tree,
-        alignment = _get_alignments_for_tree,
+        alignment = rules.combine_samples.output.alignment,
         metadata = _get_metadata_by_wildcards
     output:
-        tree = REGION_PATH + "tree.nwk",
-        node_data = REGION_PATH + "branch_lengths.json"
+        tree = "results/{build_name}/tree.nwk",
+        node_data = "results/{build_name}/branch_lengths.json"
     log:
-        "logs/refine_{region}.txt"
+        "logs/refine_{build_name}.txt"
     benchmark:
-        "benchmarks/refine_{region}.txt"
+        "benchmarks/refine_{build_name}.txt"
     threads: 1
     resources:
         # Multiple sequence alignments can use up to 15 times their disk size in
@@ -388,11 +523,11 @@ rule ancestral:
         """
     input:
         tree = rules.refine.output.tree,
-        alignment = _get_alignments_for_tree
+        alignment = rules.combine_samples.output.alignment
     output:
-        node_data = REGION_PATH + "nt_muts.json"
+        node_data = "results/{build_name}/nt_muts.json"
     log:
-        "logs/ancestral_{region}.txt"
+        "logs/ancestral_{build_name}.txt"
     params:
         inference = config["ancestral"]["inference"]
     conda: config["conda_environment"]
@@ -411,15 +546,15 @@ rule haplotype_status:
     input:
         nt_muts = rules.ancestral.output.node_data
     output:
-        node_data = REGION_PATH + "haplotype_status.json"
+        node_data = "results/{build_name}/haplotype_status.json"
     log:
-        "logs/haplotype_status_{region}.txt"
+        "logs/haplotype_status_{build_name}.txt"
     params:
         reference_node_name = config["reference_node_name"]
     conda: config["conda_environment"]
     shell:
         """
-        python3 scripts/annotate-haplotype-status.py \
+        {python:q} scripts/annotate-haplotype-status.py \
             --ancestral-sequences {input.nt_muts} \
             --reference-node-name {params.reference_node_name:q} \
             --output {output.node_data} 2>&1 | tee {log}
@@ -432,9 +567,9 @@ rule translate:
         node_data = rules.ancestral.output.node_data,
         reference = config["files"]["reference"]
     output:
-        node_data = REGION_PATH + "aa_muts.json"
+        node_data = "results/{build_name}/aa_muts.json"
     log:
-        "logs/translate_{region}.txt"
+        "logs/translate_{build_name}.txt"
     conda: config["conda_environment"]
     shell:
         """
@@ -444,14 +579,6 @@ rule translate:
             --reference-sequence {input.reference} \
             --output-node-data {output.node_data} 2>&1 | tee {log}
         """
-
-def _get_sampling_trait_for_wildcards(wildcards):
-    mapping = {"north-america": "country", "oceania": "country"} # TODO: switch to "division"
-    return mapping[wildcards.region] if wildcards.region in mapping else "country"
-
-def _get_exposure_trait_for_wildcards(wildcards):
-    mapping = {"north-america": "country_exposure", "oceania": "country_exposure"} # TODO: switch to "division_exposure"
-    return mapping[wildcards.region] if wildcards.region in mapping else "country_exposure"
 
 rule traits:
     message:
@@ -463,12 +590,12 @@ rule traits:
         tree = rules.refine.output.tree,
         metadata = _get_metadata_by_wildcards
     output:
-        node_data = REGION_PATH + "traits.json",
+        node_data = "results/{build_name}/traits.json"
     log:
-        "logs/traits_{region}.txt"
+        "logs/traits_{build_name}.txt"
     params:
-        columns = _get_exposure_trait_for_wildcards,
-        sampling_bias_correction = config["traits"]["sampling_bias_correction"]
+        columns = _get_trait_columns_by_wildcards,
+        sampling_bias_correction = _get_sampling_bias_correction_for_wildcards
     conda: config["conda_environment"]
     shell:
         """
@@ -489,9 +616,9 @@ rule clades:
         nuc_muts = rules.ancestral.output.node_data,
         clades = config["files"]["clades"]
     output:
-        clade_data = REGION_PATH + "clades.json"
+        clade_data = "results/{build_name}/clades.json"
     log:
-        "logs/clades_{region}.txt"
+        "logs/clades_{build_name}.txt"
     conda: config["conda_environment"]
     shell:
         """
@@ -501,6 +628,60 @@ rule clades:
             --output-node-data {output.clade_data} 2>&1 | tee {log}
         """
 
+rule pangolin:
+    message: "Adding internal clade labels"
+    input:
+        tree = rules.refine.output.tree,
+    output:
+        clade_data = "results/{build_name}/pangolin.json"
+    log:
+        "logs/pangolin_{build_name}.txt"
+    conda: config["conda_environment"]
+    shell:
+        """
+        {python:q} scripts/add_pangolin_lineages.py \
+            --tree {input.tree} \
+            --output {output.clade_data}
+        """
+
+
+rule legacy_clades:
+    message: "Adding internal clade labels"
+    input:
+        tree = rules.refine.output.tree,
+        aa_muts = rules.translate.output.node_data,
+        nuc_muts = rules.ancestral.output.node_data,
+        clades = config["files"]["legacy_clades"]
+    output:
+        clade_data = "results/{build_name}/temp_legacy_clades.json"
+    log:
+        "logs/legacy_clades_{build_name}.txt"
+    conda: config["conda_environment"]
+    shell:
+        """
+        augur clades --tree {input.tree} \
+            --mutations {input.nuc_muts} {input.aa_muts} \
+            --clades {input.clades} \
+            --output-node-data {output.clade_data} 2>&1 | tee {log}
+        """
+
+rule rename_legacy_clades:
+    input:
+        node_data = rules.legacy_clades.output.clade_data
+    output:
+        clade_data = "results/{build_name}/legacy_clades.json"
+    run:
+        import json
+        with open(input.node_data, 'r', encoding='utf-8') as fh:
+            d = json.load(fh)
+            new_data = {}
+            for k,v in d['nodes'].items():
+                if "clade_membership" in v:
+                    new_data[k] = {"legacy_clade_membership": v["clade_membership"]}
+        with open(output.clade_data, "w") as fh:
+            json.dump({"nodes":new_data}, fh)
+
+
 rule colors:
     message: "Constructing colors file"
     input:
@@ -508,13 +689,13 @@ rule colors:
         color_schemes = config["files"]["color_schemes"],
         metadata = _get_metadata_by_wildcards
     output:
-        colors = "config/colors_{region}.tsv"
+        colors = "results/{build_name}/colors.tsv"
     log:
-        "logs/colors_{region}.txt"
+        "logs/colors_{build_name}.txt"
     conda: config["conda_environment"]
     shell:
         """
-        python3 scripts/assign-colors.py \
+        {python:q} scripts/assign-colors.py \
             --ordering {input.ordering} \
             --color-schemes {input.color_schemes} \
             --output {output.colors} \
@@ -526,13 +707,13 @@ rule recency:
     input:
         metadata = _get_metadata_by_wildcards
     output:
-        REGION_PATH + "recency.json"
+        node_data = "results/{build_name}/recency.json"
     log:
-        "logs/recency_{region}.txt"
+        "logs/recency_{build_name}.txt"
     conda: config["conda_environment"]
     shell:
         """
-        python3 scripts/construct-recency-from-submission-date.py \
+        {python:q} scripts/construct-recency-from-submission-date.py \
             --metadata {input.metadata} \
             --output {output} 2>&1 | tee {log}
         """
@@ -543,9 +724,9 @@ rule tip_frequencies:
         tree = rules.refine.output.tree,
         metadata = _get_metadata_by_wildcards
     output:
-        tip_frequencies_json = "auspice/ncov_{region}_tip-frequencies.json"
+        tip_frequencies_json = "results/{build_name}/tip-frequencies.json"
     log:
-        "logs/tip_frequencies_{region}.txt"
+        "logs/tip_frequencies_{build_name}.txt"
     params:
         min_date = config["frequencies"]["min_date"],
         pivot_interval = config["frequencies"]["pivot_interval"],
@@ -566,35 +747,58 @@ rule tip_frequencies:
         """
 
 def export_title(wildcards):
-    region = wildcards.region
+    # TODO: maybe we could replace this with a config entry for full/human-readable build name?
+    location_name = wildcards.build_name
 
-    if not region:
+    # If specified in config file generally, or in a config file build
+    if "title" in config["builds"][location_name]:
+        return config["builds"][location_name]["title"]
+    elif "title" in config:
+        return config["title"]
+
+    # Else return an auto-generated title
+    if not location_name:
         return "Genomic epidemiology of novel coronavirus"
-    elif region == "global":
+    elif location_name == "global":
         return "Genomic epidemiology of novel coronavirus - Global subsampling"
     else:
-        region_title = region.replace("-", " ").title()
-        return f"Genomic epidemiology of novel coronavirus - {region_title}-focused subsampling"
+        location_title = location_name.replace("-", " ").title()
+        return f"Genomic epidemiology of novel coronavirus - {location_title}-focused subsampling"
+
+def _get_node_data_by_wildcards(wildcards):
+    """Return a list of node data files to include for a given build's wildcards.
+    """
+    # Define inputs shared by all builds.
+    wildcards_dict = dict(wildcards)
+    inputs = [
+        rules.refine.output.node_data,
+        rules.ancestral.output.node_data,
+        rules.translate.output.node_data,
+        rules.rename_legacy_clades.output.clade_data,
+        rules.clades.output.clade_data,
+        rules.pangolin.output.clade_data,
+        rules.recency.output.node_data,
+        rules.traits.output.node_data
+    ]
+
+    # Convert input files from wildcard strings to real file names.
+    inputs = [input_file.format(**wildcards_dict) for input_file in inputs]
+    return inputs
 
 rule export:
     message: "Exporting data files for for auspice"
     input:
         tree = rules.refine.output.tree,
         metadata = _get_metadata_by_wildcards,
-        branch_lengths = rules.refine.output.node_data,
-        nt_muts = rules.ancestral.output.node_data,
-        aa_muts = rules.translate.output.node_data,
-        traits = rules.traits.output.node_data,
-        auspice_config = config["files"]["auspice_config"],
-        colors = rules.colors.output.colors,
+        node_data = _get_node_data_by_wildcards,
+        auspice_config = lambda w: config["builds"][w.build_name]["auspice_config"] if "auspice_config" in config["builds"][w.build_name] else config["files"]["auspice_config"],
+        colors = lambda w: config["builds"][w.build_name]["colors"] if "colors" in config["builds"][w.build_name] else ( config["files"]["colors"] if "colors" in config["files"] else rules.colors.output.colors.format(**w) ),
         lat_longs = config["files"]["lat_longs"],
-        description = config["files"]["description"],
-        clades = rules.clades.output.clade_data,
-        recency = rules.recency.output
+        description = config["files"]["description"]
     output:
-        auspice_json = REGION_PATH + "ncov_with_accessions.json"
+        auspice_json = "results/{build_name}/ncov_with_accessions.json"
     log:
-        "logs/export_{region}.txt"
+        "logs/export_{build_name}.txt"
     params:
         title = export_title
     conda: config["conda_environment"]
@@ -603,7 +807,7 @@ rule export:
         augur export v2 \
             --tree {input.tree} \
             --metadata {input.metadata} \
-            --node-data {input.branch_lengths} {input.nt_muts} {input.aa_muts} {input.traits} {input.clades} {input.recency} \
+            --node-data {input.node_data} \
             --auspice-config {input.auspice_config} \
             --colors {input.colors} \
             --lat-longs {input.lat_longs} \
@@ -612,23 +816,24 @@ rule export:
             --output {output.auspice_json} 2>&1 | tee {log}
         """
 
+
 rule incorporate_travel_history:
     message: "Adjusting main auspice JSON to take into account travel history"
     input:
         auspice_json = rules.export.output.auspice_json,
-        colors = rules.colors.output.colors,
+        colors = lambda w: config["files"]["colors"] if "colors" in config["files"] else rules.colors.output.colors.format(**w),
         lat_longs = config["files"]["lat_longs"]
     params:
         sampling = _get_sampling_trait_for_wildcards,
         exposure = _get_exposure_trait_for_wildcards
     output:
-        auspice_json = REGION_PATH + "ncov_with_accessions_and_travel_branches.json"
+        auspice_json = "results/{build_name}/ncov_with_accessions_and_travel_branches.json"
     log:
-        "logs/incorporate_travel_history_{region}.txt"
+        "logs/incorporate_travel_history_{build_name}.txt"
     conda: config["conda_environment"]
     shell:
         """
-        python3 ./scripts/modify-tree-according-to-exposure.py \
+        {python:q} ./scripts/modify-tree-according-to-exposure.py \
             --input {input.auspice_json} \
             --colors {input.colors} \
             --lat-longs {input.lat_longs} \
@@ -637,18 +842,21 @@ rule incorporate_travel_history:
             --output {output.auspice_json} 2>&1 | tee {log}
         """
 
-rule fix_colorings:
-    message: "Remove extraneous colorings for main build"
+rule finalize:
+    message: "Remove extraneous colorings for main build and move frequencies"
     input:
-        auspice_json = rules.incorporate_travel_history.output.auspice_json
+        auspice_json = rules.incorporate_travel_history.output.auspice_json,
+        frequencies = rules.tip_frequencies.output.tip_frequencies_json
     output:
-        auspice_json = "auspice/ncov_{region}.json"
+        auspice_json = "auspice/ncov_{build_name}.json",
+        tip_frequency_json = "auspice/ncov_{build_name}_tip-frequencies.json"
     log:
-        "logs/fix_colorings_{region}.txt"
+        "logs/fix_colorings_{build_name}.txt"
     conda: config["conda_environment"]
     shell:
         """
-        python scripts/fix-colorings.py \
+        {python:q} scripts/fix-colorings.py \
             --input {input.auspice_json} \
-            --output {output.auspice_json} 2>&1 | tee {log}
+            --output {output.auspice_json} 2>&1 | tee {log} &&
+        cp {input.frequencies} {output.tip_frequency_json}
         """

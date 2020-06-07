@@ -1,6 +1,11 @@
 {
   "colorings": [
     {
+      "key": "legacy_clade_membership",
+      "title": "Old Nextstrain clade",
+      "type": "categorical"
+    },
+    {
       "key": "location",
       "title": "Location",
       "type": "categorical"
@@ -65,14 +70,25 @@
     },
     {
       "key": "country_exposure",
-      "title": "Exposure History",
+      "title": "Country of exposure",
+      "type": "categorical"
+    },
+    {
+      "key": "division_exposure",
+      "title": "Division of exposure",
+      "type": "categorical"
+    },
+    {
+      "key": "region_exposure",
+      "title": "Region of exposure",
       "type": "categorical"
     }
   ],
   "geo_resolutions": [
     "location",
     "division",
-    "country"
+    "country",
+    "region"
   ],
   "display_defaults": {
     "color_by": "country",
@@ -88,9 +104,7 @@
     "country",
     "region",
     "host",
-    "author",
-    "originating_lab",
-    "submitting_lab"
+    "author"
   ],
   "panels": [
     "tree",
