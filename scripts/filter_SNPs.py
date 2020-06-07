@@ -112,6 +112,7 @@ if __name__ == "__main__":
     drop_snps = []
     atcg_cov_thr = [] 
     conf_flag = []
+    hfl_flag = []
 
     for i in range(snps_vcf.shape[0]):
        snp_pos = snps_vcf['POS'].values[i]
@@ -123,6 +124,7 @@ if __name__ == "__main__":
        
        # initiate conf score and flag to false
        c_flag = 'NO'
+       hf_flag = 'NO'
     
        # Check if the ref ALLELE is different switch counts
        if snp_pos in swap_ref:
@@ -151,7 +153,8 @@ if __name__ == "__main__":
           atcg_count = [ float(nt_dict.get(k, 0)) for k in nt ]
           atcg_cov = get_cov(num_samples, sum(atcg_count))
           # Update flag
-          if (atcg_cov >= float(cov)) or (snp_pos in clade_nuc) : c_flag = 'YES'
+          if (snp_pos in clade_nuc) : c_flag = 'YES'
+          if (atcg_cov >= float(cov)) : hf_flag = 'YES'
           # Calculate frequency of alt alleles      
           freq = ",".join([ str(round(int(i) / int(num_samples),3)) if i != 0 else 0  for i in counts.split(',')])
           alt_list.append(snp_alt)
@@ -159,6 +162,7 @@ if __name__ == "__main__":
           alele_freq.append(freq)
           atcg_cov_thr.append(atcg_cov)
           conf_flag.append(c_flag)
+          hfl_flag.append(hf_flag)
        else:
           drop_snps.append(int(snp_pos))
 
@@ -173,7 +177,8 @@ if __name__ == "__main__":
     out_vcf['OCCURENCES'] = aln_counts
     out_vcf['ALELE_FREQ'] = alele_freq
     out_vcf['COV'] = atcg_cov_thr
-    out_vcf['CONF_FLAG'] = conf_flag
+    out_vcf['CLADE_FLAG'] = conf_flag
+    out_vcf['HF_FLAG'] = hfl_flag
 
     out_vcf = out_vcf[out_vcf.OCCURENCES != '']
     print("Filtered SNPs : " +str(out_vcf.shape[0]) + " ; Samples : " + "\t" + str(snps_vcf.shape[1]-9) )

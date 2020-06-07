@@ -23,12 +23,11 @@ import random , time
 from datetime import datetime , date , timedelta
 from pandas.io.json import json_normalize
 from Bio import SeqIO
-
+from pytz import timezone
 
 #Order of metadata in nextstrain as of 04/07/2020
 COL_ORDER =['strain','virus','gisaid_epi_isl','genbank_accession','date','region','country','division','location','region_exposure','country_exposure','division_exposure','segment','length','host','age','sex','originating_lab','submitting_lab','authors','url','title','date_submitted']
 
-#df = df[[df.columns[i] for i in order]]
 AGE_RANGE = range(1,89)
 AGE = [ i for i in AGE_RANGE ]
 AGE.append('unknown')
@@ -37,7 +36,12 @@ SEX = ['Male' , 'Female' , 'unknown']
 GISAID_URL = 'https://www.gisaid.org/'
 JHU_URL = 'https://www.jhu.edu/'
 
-CUR_DATE = pd.datetime.today()
+SUB_FMT ="%Y-%m-%d"
+CUR_DATE = datetime.now(timezone('US/Eastern'))
+CUR_DATE = CUR_DATE.strftime(SUB_FMT)
+#CUR_DATE = datetime.strptime(CUR_DATE,SUB_FMT)
+print(CUR_DATE)
+#CUR_DATE = pd.datetime.today()
 EPI_START =  datetime.strptime('2020-01-03', '%Y-%m-%d')
 
 def get_fasta_lengths(fasta):
@@ -50,20 +54,29 @@ def get_fasta_lengths(fasta):
            print("Duplicate record found for " + seq_record.id )
     return fa_lens
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script to Parse augur json files")
     parser.add_argument("-in",dest="xfile",type=str, required=True, help="Path to the GISAID tsv")
     parser.add_argument("-g",dest="fa_file",type=str, required=True, help="Path to the fasta file from GISAID")
+    parser.add_argument("-m",dest="keep_metadata",type=str2bool, required=True, nargs='?', const=True, default=False, help="keep additional metadata")
     parser.add_argument("-o",dest="out", type=str, default="gisaid_metadata.tsv", help="Output file path")
-    #parser.add_argument("-x",dest="exclude", type=str, default="exclude_samples.txt", help="Output exclude file path")
 
     args = parser.parse_args()
     gisaid_file = args.xfile
     fa_file = args.fa_file
     out_file = args.out
     #ex_file = args.exclude
-    
-    #data_tsv = pd.read_excel(gisaid_file, 'Acknowledgement Table', skiprows=list(range(2)))
+    keep_metadata = args.keep_metadata
     data_tsv = pd.read_table(gisaid_file,header=0,na_filter= False)
     
     # Drop empty rows in excel sheet
@@ -98,14 +111,15 @@ if __name__ == "__main__":
         #print(data_tsv.head(5))
     # Delete unneccessary columns after splitting
     #data_tsv.drop(['Location'], axis=1, inplace=True)
-    DROP_COLS = [ 'Type' , 
-                  'Passage details / history' ,
+    if keep_metadata: 
+       DROP_COLS = [ 'Type' , 
+                  'Passage details/history' ,
                   'Location' , 
                   'Additional location information' , 
                   'Additional host information', 
                   'Patient status' ,
                   'Specimen source' , 
-                  'Outbreak detail' ,
+                  'Outbreak' ,
                   'Last vaccinated' ,
                   'Treatment' , 
                   'Sequencing technology',
@@ -113,11 +127,29 @@ if __name__ == "__main__":
                   'Coverage',
                   'Address',
                   'Address.1' ,
-                  'Sample ID given by the Submitting lab' , 
-                  'Submitter' , 
+                  'Sample ID given by the submitting laboratory' , 
+                  'Submitter' ] 
+    else:
+         DROP_COLS = [ 'Type' , 
+                  'Passage details/history' ,
+                  'Location' , 
+                  'Additional location information' ,
+                  'Additional host information',
+                  'Patient status' ,
+                  'Specimen source' ,
+                  'Outbreak' ,
+                  'Last vaccinated' ,
+                  'Treatment' ,
+                  'Sequencing technology',
+                  'Assembly method',
+                  'Coverage',
+                  'Address',
+                  'Address.1' ,
+                  'Sample ID given by the submitting laboratory' ,
+                  'Submitter' ,
                   'Run date' , 
                   'Run folder']
-    
+
     data_tsv.drop(DROP_COLS, axis = 1,inplace=True) 
         
     # Rename columns to nextstrain columns
@@ -134,12 +166,12 @@ if __name__ == "__main__":
                                                 })
     
     #data_tsv['gisaid_epi_isl'] = data_tsv['gisaid_epi_isl'].fillna(data_tsv['Sample ID given by the provider'])
-    #data_tsv.gisaid_epi_isl.combine_first(data_tsv['Sample ID given by the provider'])
+    #data_tsv.gisaid_epi_isl.combine_first(data_tsv['Sample ID given by the sample provider'])
     #data_tsv['gisaid_epi_isl']=data_tsv['gisaid_epi_isl'].mask(pd.isnull, data_tsv['Sample ID given by the provider'])
-    data_tsv['gisaid_epi_isl'] = data_tsv['Sample ID given by the provider']
+    data_tsv['gisaid_epi_isl'] = data_tsv['Sample ID given by the sample provider']
     #print(data_tsv['Sample ID given by the provider'])
     #print(data_tsv['gisaid_epi_isl'].tolist())
-    data_tsv.drop('Sample ID given by the provider',axis =1 , inplace = True)
+    data_tsv.drop('Sample ID given by the sample provider',axis =1 , inplace = True)
     data_tsv['gisaid_epi_isl'] = ''
     data_tsv['virus'] = 'ncov'
     data_tsv['genbank_accession'] = "?"
@@ -169,9 +201,14 @@ if __name__ == "__main__":
     # GISAID url
     data_tsv['url'] = JHU_URL
     data_tsv['title'] = 'unknown'
+    data_tsv['date_submitted'].fillna(CUR_DATE , inplace = True)
+    #data_tsv.date_submitted[ data_tsv.date_submitted == "unknown" ]  = CUR_DATE
+    data_tsv.date_submitted.replace(["","unknown" , "?" , "??" ], [CUR_DATE, CUR_DATE,CUR_DATE,CUR_DATE], inplace=True)
+ 
     #data_tsv['date_submitted'] = data_tsv['date']
     #data_tsv['date_submitted'] = [ i + timedelta(weeks=2) for i in data_tsv['date'] ]
     data_tsv.fillna("unknown", inplace=True)
+    data_tsv.date_submitted.replace(["unknown" , "?" , "??" ], [CUR_DATE,CUR_DATE,CUR_DATE], inplace=True)
     data_tsv = data_tsv.applymap(lambda x: x.strip() if isinstance(x, str) else x)
             
     #data_tsv.columns
@@ -181,7 +218,17 @@ if __name__ == "__main__":
     #print(data_tsv.columns.tolist())
     #print(len(COL_ORDER))
     
-    
+    if keep_metadata:
+       data_tsv = data_tsv.rename(columns = {'Run date' : 'run_date' , 
+                                              'Run folder' : 'run_id' })
+       add_metadata_list = [ i for i in data_tsv.columns.tolist() if i not in COL_ORDER ]
+       print("Total Number of Samples  : " + str(data_tsv.shape[0]))
+       #print(data_tsv.head())
+       #data_tsv['run_id'] = data_tsv['run_id'].str.replace("/","")
+       #COL_ORDER = COL_ORDER + ["run_date" , "run_id"]
+       COL_ORDER = COL_ORDER + add_metadata_list
+    print(COL_ORDER)
+    print(data_tsv.columns.tolist())
     if (len(COL_ORDER) == len(data_tsv.columns.tolist())):
         data_tsv = data_tsv[COL_ORDER]
     else: 
