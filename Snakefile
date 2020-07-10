@@ -16,7 +16,7 @@ if "builds" not in config:
     config["builds"] = {
         "global":{
                     "geographic_scale": "region",
-                    "subsampling_scheme": "region_global",
+                    "subsampling_scheme": "region_global"
                  }
         }
 

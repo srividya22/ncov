@@ -1,6 +1,6 @@
 configfile:
   - config/config_beta.yaml
-  - profiles/jhu_beta/builds.yaml
+  - profiles/jhu_release/builds.yaml
 
 cores: 8
 keep-going: True

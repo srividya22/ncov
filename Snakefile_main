@@ -6,15 +6,23 @@ from snakemake.utils import validate
 configfile: "config/config_beta.yaml"
 validate(config, schema="schemas/config.schema.yaml")
 
-# For information on how to run Nextstrain 'regions' runs, see rules/nextstrain_exports.smk
-# Regions can be defined as a list or a space-delimited string that is converted
-# to a list.
-if "regions" not in config:
-    REGIONS = ["global"]
-elif isinstance(config["regions"], list):
-    REGIONS = config["regions"]
-else:
-    REGIONS = config["regions"].split(" ")
+# In our shell rules, we try to use the same Python executable running
+# Snakemake, if known, by interpolating {python:q}.  The aim is to prevent
+# issues with multiple Python versions or symlinks for python vs. python3.
+python = sys.executable or "python3"
+
+# default build if none specified in config
+if "builds" not in config:
+    config["builds"] = {
+        "global":{
+                    "geographic_scale": "region",
+                    "subsampling_scheme": "region_global",
+                 }
+        }
+
+BUILD_NAMES = list(config["builds"].keys())
+
+######### This part was added in code##########
 
 if "outdir" not in config:
     OUTDIR = os.getcwd()
@@ -24,35 +32,29 @@ else:
 if not os.path.exists(OUTDIR):
     os.makedirs(OUTDIR)
 
-# Define patterns we expect for wildcards.
-wildcard_constraints:
-    region = "[-a-zA-Z]+",
-    date = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"
-
-localrules: download
-
-# Define the format of the output path per region.
-# This format can be changed in the future to group builds by different criteria (e.g., division, country, etc.).
-REGION_PATH = "results/region/{region}/"
-
 def get_todays_date():
     from datetime import datetime
     date = datetime.today().strftime('%Y-%m-%d')
     return date
+    
+###############################################
+
+# Define patterns we expect for wildcards.
+wildcard_constraints:
+    # Allow build names to contain alpha characters, underscores, and hyphens
+    # but not special strings used for Nextstrain builds.
+    build_name = r'(?:[_a-zA-Z-](?!(tip-frequencies|gisaid|zh)))+',
+    date = r"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"
+
+localrules: download
 
 # Create a standard ncov build for auspice, by default.
 rule all:
     input:
-        #final_sequences = OUTDIR + "final/sequences.fasta",
-        #final_metadata = OUTDIR + "final/metadata.tsv" ,
-        #local_sequences = OUTDIR + "final/local_sequences.fasta",
-        #local_metadata = OUTDIR + "final/local_metadata.tsv" ,
-        #sequences = OUTDIR + "data/sequences.fasta" , 
-        #metadata = OUTDIR + "data/metadata.tsv" ,
-        auspice_json = expand(OUTDIR + "auspice/ncov_{region}.json", region=REGIONS),
-        tip_frequencies_json = expand(OUTDIR + "auspice/ncov_{region}_tip-frequencies.json", region=REGIONS),
-        dated_auspice_json = expand(OUTDIR + "auspice/ncov_{region}_{date}.json", date=get_todays_date(), region=REGIONS),
-        dated_tip_frequencies_json = expand(OUTDIR + "auspice/ncov_{region}_{date}_tip-frequencies.json", date=get_todays_date(), region=REGIONS)
+        auspice_json = expand(OUTDIR + "auspice/ncov_{build_name}.json", build_name=BUILD_NAMES),
+        tip_frequencies_json = expand(OUTDIR + "auspice/ncov_{build_name}_tip-frequencies.json", build_name=BUILD_NAMES),
+        dated_auspice_json = expand(OUTDIR + "auspice/ncov_{build_name}_{date}.json", date=get_todays_date(), build_name=BUILD_NAMES),
+        dated_tip_frequencies_json = expand(OUTDIR + "auspice/ncov_{build_name}_{date}_tip-frequencies.json", date=get_todays_date(), build_name=BUILD_NAMES )
 
 rule clean:
     message: "Removing directories: {params}"
@@ -61,12 +63,11 @@ rule clean:
         "auspice"
     shell:
         "rm -rfv {params}"
-
+    
 # Include small, shared functions that help build inputs and parameters.
-#include: "rules/prepare.smk"
-
 include: "rules/prepare.smk"
 include: "rules/common.smk"
+
 # Include rules to handle primary build logic from multiple sequence alignment
 # to output of auspice JSONs for a default build.
 include: "rules/builds_main.smk"

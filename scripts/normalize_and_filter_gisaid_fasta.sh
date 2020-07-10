@@ -22,9 +22,10 @@ fi
 if [[ -z "$MIN_LENGTH" ]]
 then
 	echo "Using default minimum length of 25000"
-	MIN_LENGTH=25000
+	MIN_LENGTH=29002
 fi
 
+JHU_PREFIX="HP00"
 echo "Normalizing GISAID file $GISAID_SARSCOV2_IN  (min length $MIN_LENGTH)"
 # Check
 
@@ -38,9 +39,14 @@ echo "Normalizing GISAID file $GISAID_SARSCOV2_IN  (min length $MIN_LENGTH)"
 # Remove seq without metadata
 TP_DIR=${OUT_DIR}/tmp
 mkdir -p ${TP_DIR}
+
+seqtk comp $GISAID_SARSCOV2_IN | awk '{ a[$1] += $9 ; b[$1] = $2 } END {for ( i in a ) { print i"\t"b[i]"\t"a[i] }} ' | awk '$1 ~ /HP00/ || ( $2 > 29000 && $3 <= 1000 ) { print $1}' > ${TP_DIR}/gisaid_selected.txt
+
+seqtk subseq $GISAID_SARSCOV2_IN ${TP_DIR}/gisaid_selected.txt > ${TP_DIR}/gisaid_selected.fasta
+
 #cat $GISAID_SARSCOV2_IN |
 
-	sed 's/^>[hn][Cc]o[Vv]-19\//>/g' $GISAID_SARSCOV2_IN |	# remove leading prefix
+	sed 's/^>[hn][Cc]o[Vv]-19\//>/g' ${TP_DIR}/gisaid_selected.fasta |	# remove leading prefix
 	sed 's/ //g' |					# remove embedded spaces
 	sed 's/|.*$//' | 				# remove trailing metadata
 	awk "BEGIN{RS=\">\";FS=\"\n\"}length>$MIN_LENGTH{print \">\"\$0}" |	# remove short seqs

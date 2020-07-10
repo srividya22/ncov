@@ -6,6 +6,16 @@
   ],
   "colorings": [
     {
+      "key": "legacy_clade_membership",
+      "title": "Old Nextstrain clade",
+      "type": "categorical"
+    },
+    {
+      "key": "pangolin_lineage",
+      "title": "Pangolin lineage",
+      "type": "categorical"
+    },
+    {
       "key": "location",
       "title": "Location",
       "type": "categorical"
@@ -41,16 +51,6 @@
       "type": "categorical"
     },
     {
-      "key": "run_id",
-      "title": "Run_id",
-      "type": "categorical"
-    },
-    {
-      "key": "run_date",
-      "title": "Run_date",
-      "type": "continuous"
-    },
-    {
       "key": "author",
       "title": "Authors",
       "type": "categorical"
@@ -80,8 +80,28 @@
     },
     {
       "key": "country_exposure",
-      "title": "Exposure History",
+      "title": "Country of exposure",
       "type": "categorical"
+    },
+    {
+      "key": "division_exposure",
+      "title": "Division of exposure",
+      "type": "categorical"
+    },
+    {
+      "key": "region_exposure",
+      "title": "Region of exposure",
+      "type": "categorical"
+    },
+   {
+      "key": "run_id",
+      "title": "Run_id",
+      "type": "categorical"
+    },
+    {
+      "key": "run_date",
+      "title": "Run_date",
+      "type": "continuous"
     },
     {
       "key": "race",
@@ -96,11 +116,6 @@
     {
       "key": "diagnostic_ct_value",
       "title": "Diagnostic Ct_value",
-      "type": "categorical"
-    },
-    {
-      "key": "pangolin_clade",
-      "title": "Rambaut's Clade",
       "type": "categorical"
     },
     {
@@ -123,7 +138,7 @@
       "title": "Diabetes",
       "type": "categorical"
     },
-    {
+       {
       "key": "obese",
       "title": "Obese",
       "type": "categorical"
@@ -167,13 +182,7 @@
       "key": "admit",
       "title": "admit",
       "type": "categorical"
-    },
-    {
-      "key": "icu",
-      "title": "icu",
-      "type": "categorical"
-    },
-    {
+    }, {
       "key": "vent",
       "title": "Ventilator",
       "type": "categorical"
@@ -209,6 +218,11 @@
       "type": "categorical"
     },
     {
+      "key": "paper_isolate",
+      "title": "Paper_isolate",
+      "type": "categorical"
+    },
+    {
       "key": "covidsickcontact",
       "title": "COVID Sick Contact",
       "type": "categorical"
@@ -217,31 +231,32 @@
   "geo_resolutions": [
     "location",
     "division",
-    "country"
+    "country",
+    "region"
   ],
   "display_defaults": {
-    "color_by": "country",
+    "color_by": "region",
     "distance_measure": "num_date",
     "geo_resolution": "country",
     "map_triplicate": true,
-    "branch_label": "none"
+    "branch_label": "clade"
   },
   "filters": [
     "recency",
-    "location",
-    "division",
-    "country",
+    "clade_membership",
+    "pangolin_lineage",
+    "legacy_clade_membership",
     "region",
+    "country",
+    "division",
+    "location",
     "host",
+    "author",
     "run_id",
     "run_date",
-    "author",
-    "originating_lab",
-    "submitting_lab",
     "race",
-    "days_from_onset" , 
-    "diagnostic_ct_value", 
-    "pangolin_clade", 
+    "days_from_onset" ,
+    "diagnostic_ct_value",
     "travel",
     "covidsickcontact",
     "cardiacdx" ,
@@ -249,21 +264,22 @@
     "diabetes" ,
     "obese" ,
     "etoh" ,
-    "smoker" , 
+    "smoker" ,
     "immunecomp" ,
     "fever" ,
     "bodyache" ,
     "gi" ,
     "sob" ,
-    "admit" , 
+    "admit" ,
     "icu",
-    "vent" , 
-    "oxygen" , 
+    "vent" ,
+    "oxygen" ,
     "nsaid" ,
     "anyadmission" ,
-    "cxrabn" , 
+    "cxrabn" ,
     "outcome" ,
-    "cough"
+    "cough",
+    "paper_isolate"
   ],
   "panels": [
     "tree",

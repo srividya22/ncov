@@ -54,7 +54,7 @@ rule normalize_local:
         """
     input:
         l_sequences = config["local_sequences"],
-        l_metadata = config["local_gisaid_metadata"]
+        l_metadata = config["local_gisaid_metadata"],
         all_sequences = config["all_local_sequences"],
         all_metadata = config["all_local_gisaid_metadata"]
     params:
@@ -83,8 +83,8 @@ rule normalize_local:
            scripts/parse_meta_from_GISAID_to_nextstrain.py -in {input.l_metadata} -g {input.l_sequences} -m "no" -o {output.lf_tmp_meta}
            scripts/parse_meta_from_GISAID_to_nextstrain.py -in {input.all_metadata} -g {input.all_sequences} -m "no" -o {output.all_lf_tmp_meta}
         fi
-        echo "Running Cmd : scripts/normalize_and_filter_gisaid_fasta.sh {input.l_sequences} {output.lf_tmp_meta} {output.lf_sequences} {output.lf_metadata} {params.min_length}"
-        scripts/normalize_and_filter_gisaid_fasta.sh {input.l_sequences} {output.lf_tmp_meta} {output.lf_sequences} {output.lf_metadata}
+        echo "Running Cmd : scripts/normalize_and_filter_local_fasta.sh {input.l_sequences} {output.lf_tmp_meta} {output.lf_sequences} {output.lf_metadata} {params.min_length}"
+        scripts/normalize_and_filter_local_fasta.sh {input.l_sequences} {output.lf_tmp_meta} {output.lf_sequences} {output.lf_metadata} {params.min_length}
         #if [ params.add_metadata == "yes" ]; then
         #   echo "Adding additional metadata run_data and run_id"
         #   scripts/add_additional_metadata.py -in {output.lf_metadata} -o {output.lf_metadata}
@@ -99,7 +99,8 @@ rule normalize_gisaid:
     input:
         n_sequences = rules.download_gisaid.output.gi_sequences,
         n_metadata = rules.download_gisaid.output.gi_metadata,
-        meta_list = rules.normalize_local.output.lf_add_meta
+        meta_list = rules.normalize_local.output.lf_add_meta,
+        final_jhu_meta = rules.normalize_local.output.all_lf_tmp_meta
     params:
         add_metadata = config['add_metadata'] ## "yes" or "no"
     output:
@@ -111,7 +112,8 @@ rule normalize_gisaid:
         scripts/normalize_and_filter_gisaid_fasta.sh {input.n_sequences} {input.n_metadata} {output.on_sequences} {output.on_metadata}
         if [ {params.add_metadata} = "yes" ]; then
            echo "Adding additional metadata run_data and run_id"
-           scripts/add_additional_metadata.py -in {output.on_metadata} -l {input.meta_list} -o {output.on_metadata}
+           #scripts/add_additional_metadata.py -in {output.on_metadata} -l {input.meta_list} -o {output.on_metadata}
+           scripts/add_additional_metadata.py -in {output.on_metadata} -l {input.meta_list} -m {input.final_jhu_meta} -o {output.on_metadata}
         fi
         """
         
@@ -143,8 +145,8 @@ rule run_only_jhu_seq:
     input:
         ref_seq = rules.normalize_gisaid.output.on_sequences,
         ref_metadata = rules.normalize_gisaid.output.on_metadata,
-        jhu_seq = rules.normalize_local.output.all_sequences,
-        jhu_metadata = rules.normalize_local.output.all_lf_tmp_metadata
+        jhu_seq = rules.normalize_local.input.all_sequences,
+        jhu_metadata = rules.normalize_local.output.all_lf_tmp_meta
         #jhu_seq = config['all_local_sequences'],
         #jhu_metadata = config['all_local_gisaid_metadata']
     params:
