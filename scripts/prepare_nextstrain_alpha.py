@@ -112,12 +112,9 @@ class PrepareAlphaNextstrain:
         print(time.ctime() + ' --- ' + message, flush=True)
    
     def get_fasta_lengths(self,fasta):
-        #fa_lens = {}
         fa_lens = []
         N_counts = []
         for seq_record in SeqIO.parse(fasta, "fasta"):
-            #if seq_record.id not in fa_lens:
-               #fa_lens[seq_record.id] =  len(seq_record)
                A_count = seq_record.seq.count('A')
                C_count = seq_record.seq.count('C')
                G_count = seq_record.seq.count('G')
@@ -125,11 +122,6 @@ class PrepareAlphaNextstrain:
                N_count = seq_record.seq.count('N')
                fa_lens.append(len(seq_record))
                N_counts.append(N_count)
-
-               #print(seq_record.id+"\t"+str(len(seq_record)))
-               #print(seq_record.id+"\t"+str(N_count))
-            #else:
-               #print("Duplicate record found for " + seq_record.id )
         return fa_lens, N_counts
 
     def getKeysByValues(self,dictOfElements, listOfValues):
@@ -148,7 +140,6 @@ class PrepareAlphaNextstrain:
         c_list = []
         for i in file_list:
             cfile = glob.glob(i + self.CONSENSUS_FASTA)[0]
-            #print(cfile)
             c_list.append(cfile)
         return c_list
         
@@ -221,11 +212,8 @@ class PrepareAlphaNextstrain:
             if meta_tsv.loc[index,'Collection date'] in ["", "?", "??","unknown", None] :
                #(meta_tsv.loc[index,'Collection date'])
                meta_tsv.loc[index,'Collection date'] = meta_tsv.loc[index,'Run date']
-               #print(meta_tsv.loc[index,'Collection date'])
             if meta_tsv.loc[index,'Submission date'] in ["", "?", "??","unknown", None] :
-               #print(meta_tsv.loc[index,'Submission date'])
                meta_tsv.loc[index,'Submission date'] = self.SUB_DATE
-               #print(meta_tsv.loc[index,'Submission date'])
             #if meta_tsv.loc[index,'Location'].astype(str).str.contains("??|unknown") :
             #   meta_tsv.loc[index,'Location'].replace("??",)
         meta_tsv[['Collection date', 'Submission date']] = meta_tsv[['Collection date','Submission date']].fillna(value=self.SUB_DATE)
@@ -263,18 +251,14 @@ class PrepareAlphaNextstrain:
         """
         self.sname_dict , self.sheader_dict , self.only_sname_dict , self.only_header_dict =  self.map_submission_names()
         alpha_tuple_list = [ (i.split(":")[0] , i.split(":")[1]) for i in self.sname_dict.keys() ] 
-        #print(alpha_tuple_list)
         self.alpha_file_list = [x[1] for x in alpha_tuple_list]
-        #print(self.alpha_file_list)
 
         self.existing_seq = self.get_fasta_header(self.SUBMITTED_SEQ)
         self.existing_snames = [ name.split(":")[1] for name, rname in self.sname_dict.items() if rname in self.existing_seq ]
         self.alpha_file_list = [e for i, e in enumerate(self.alpha_file_list) if e not in self.existing_snames]
         alpha_file_path_list = [ self.SEQ_PATH + "/" + r + "/" + self.FASTA_PATH + "/" + s for (r,s) in alpha_tuple_list if s in self.alpha_file_list ] 
-        #print(" This is alpha file path list : " + " ,".join(alpha_file_path_list))
         alpha_file_path_list = self.get_file_list(alpha_file_path_list, self.CONSENSUS_FASTA)
         
-        #print(" This is alpha file path list after glob : " + " ,".join(alpha_file_path_list))
 
         self.outseq = self.ALPHA_PREFIX + "-jhu_sequences.fasta"
         self.all_outseq = self.ALPHA_PREFIX + "-all_local_jhu_sequences.fasta"
@@ -284,16 +268,13 @@ class PrepareAlphaNextstrain:
         #new_headers = [ i.rsplit("/",3)[1].split(".nanopolish")[0] for i in ori_headers ] 
         new_headers = {}
         for header in ori_headers:
-            #print(header)
             m = re.search(self.header_pat,header)
-            #print(m)
             new_head = m.group(0)
             if header not in new_headers:
                 new_headers[header] = new_head
         
         #new_headers = { i : re.search(self.header_pat,i).group(0) for i in ori_headers } 
         #new_headers = [ i.split("4-draft-consensus/")[1] for i in new_headers ] 
-        #print(new_headers)
         self.rename_submission_fasta(self.outseq,new_headers)                       
         # Rename header if not in self.only_header_dict
         ### This part of the code is to deal with names of format MDHP-18 to be renamed to MDHP-00018
@@ -301,10 +282,8 @@ class PrepareAlphaNextstrain:
         #    if i not in self.only_header_dict:
         #        parts = i.split("-")
         #        if len(parts[1].split("_")[0]) < 5:
-        #            print("We are getting here")
         #            new_value = "-".join([parts[0],parts[1].split("_")[0].zfill(5)+"_"+parts[1].split("_")[1]])
         #            new_headers[k] = new_value
-        #            print(new_headers[k])
                     
         rename_dict =  { key : self.only_header_dict[key] if key in self.only_header_dict else key for key in new_headers.values() }
         self.rename_submission_fasta(self.outseq,rename_dict)                       
@@ -331,18 +310,14 @@ class PrepareAlphaNextstrain:
         if len(self.no_meta_ids) > 0:
             self.log("INFO : No metadata for ids : {0}".format(",".join(self.no_meta_ids)))
             self.log("INFO : Adding metadata for the ids")                    
-            print(self.no_meta_ids)
-            print(self.sname_dict)
             no_meta_mapped_list = [ (k, i.split(":")[1] , i.split(":")[0]) for k,i in self.getKeysByValues(self.sname_dict,self.no_meta_ids) ]
             missing_df_lists = [] 
             missing_df = pd.DataFrame(columns = self.meta_columns)
-            print(no_meta_mapped_list)
             self.add_meta_cols = [ i for i in missing_df.columns.tolist() if i not in self.next_fields ]
             #print("\n".join(self.add_meta_cols))
             add_rows = []
             for i,j,k in no_meta_mapped_list:
                 
-                print(i + ";" + j + ";" + k)
                 run_date = datetime.strptime(k.split("_")[0],self.DATE_FMT)
                 run_date = run_date.strftime(self.SUB_FMT)
                 row = [ i , 
@@ -357,7 +332,6 @@ class PrepareAlphaNextstrain:
                        self.seq_tech , self.assembly_method ,
                        "unknown" , self.dep  , self.address , j , self.dep  , self.address, j,
                        self.authors , self.submitter , self.SUB_DATE, run_date , k ]
-                #print(row)
                 row = row + ["unknown" for i in self.add_meta_cols]
                 add_rows.append(row)
                 #missing_df.loc[len(missing_df)] = row
@@ -368,7 +342,6 @@ class PrepareAlphaNextstrain:
 
                 #missing_df = missing_df.append(pd.Series(row),index = self.meta_columns )
             missing_df = pd.DataFrame(add_rows, columns=self.meta_columns )    
-            print(missing_df.shape)
             missing_df.to_csv(self.outmeta, mode='a', sep="\t",header=False)
             missing_df.to_csv(self.all_outmeta, mode='a', sep="\t",header=False)
           
