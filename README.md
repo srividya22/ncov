@@ -2,7 +2,7 @@
 
 This repository is customized to run viral genomes sequenced at locally at any lab alongside the public GISAID submitted viral genomes using [Nextstrain](https://nextstrain.org) to understand how SARS-CoV-2, the virus that is responsible for the COVID-19 pandemic, evolves and spreads.
 
-We have setup Johns Hopkins locally accessible builds, visible at [nextstrain.org/ncov](https://nextstrain.idies.jhu.edu/).
+We have setup Johns Hopkins locally accessible builds, visible at [alpha.nextstrain.idies.jhu.edu](https://alpha.nextstrain.idies.jhu.edu/).
 
 ---
 # Resources
