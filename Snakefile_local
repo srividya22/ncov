@@ -57,8 +57,8 @@ else:
 if not os.path.exists(OUTDIR):
     os.makedirs(OUTDIR)
 
-o_date = date.today().strftime("%Y-%m-%d")
-OUTDIR = os.path.join(OUTDIR,o_date)
+#o_date = date.today().strftime("%Y-%m-%d")
+#OUTDIR = os.path.join(OUTDIR,o_date)
 
 if not os.path.exists(OUTDIR):
     os.makedirs(OUTDIR)
